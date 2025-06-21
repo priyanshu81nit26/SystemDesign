@@ -14,14 +14,32 @@ export default function Navbar() {
   const router = useRouter();
   const { isLoggedIn, logout } = useAuth();
 
-  const handleChatSend = (e) => {
+  const handleChatSend = async (e) => {
     e.preventDefault();
     if (!chatInput.trim()) return;
-    setChatMessages((msgs) => [
-      ...msgs,
-      { sender: "user", text: chatInput },
-      { sender: "bot", text: "(AskGPT reply placeholder for: " + chatInput + ")" },
-    ]);
+  
+    const userMessage = { sender: "user", text: chatInput };
+    setChatMessages((msgs) => [...msgs, userMessage]);
+    console.log("API Key:", process.env.GEMINI_API_KEY);
+    // Call backend Gemini API
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: chatInput }),
+      });
+  
+      const data = await res.json();
+      const botMessage = { sender: "bot", text: data.reply };
+  
+      setChatMessages((msgs) => [...msgs, botMessage]);
+    } catch (err) {
+      setChatMessages((msgs) => [
+        ...msgs,
+        { sender: "bot", text: "Sorry, something went wrong." },
+      ]);
+    }
+  
     setChatInput("");
   };
 
