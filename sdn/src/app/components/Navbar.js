@@ -20,7 +20,6 @@ export default function Navbar() {
   
     const userMessage = { sender: "user", text: chatInput };
     setChatMessages((msgs) => [...msgs, userMessage]);
-    console.log("API Key:", process.env.GEMINI_API_KEY);
     // Call backend Gemini API
     try {
       const res = await fetch("/api/chat", {
